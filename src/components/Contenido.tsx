@@ -89,6 +89,7 @@ const Contenido = (props: Props): ReactElement => {
         try {
             await axios.post(`${API_URL}/rows`, newTask);
             setTasks([...tasks, newTask]);
+            currentDay && ContenidoCallBackData(currentDay, [...tasks, newTask]);
             setNewTask({
                 id         : Date.now(),
                 fecha      : currentDay,
@@ -134,6 +135,7 @@ const Contenido = (props: Props): ReactElement => {
         );
     
         setTasks(updatedTasks);
+        currentDay && ContenidoCallBackData(currentDay, updatedTasks);
     
         const taskToSave = updatedTasks.find(task => task.id === id);
         if (!taskToSave) return;
@@ -301,12 +303,14 @@ const Contenido = (props: Props): ReactElement => {
                                 <TableCell sx={{ alignContent: 'end', width: "8%" }}>
                                     {task.isEditing ? (
                                         <TextField
-                                            value={task.hora}
+                                            value={task.hora.substring(0, 5)}
                                             onChange={(e: any) =>
                                                 handleEditChange(e, task.id, "hora")
                                             }
                                             variant="standard"
                                             fullWidth
+                                            error={!!task.hora && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(task.hora.substring(0, 5))}
+                                            helperText={!!task.hora && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(task.hora.substring(0, 5)) ? "Formato inválido (HH:mm)" : ""}
                                         />
                                     ) : (
                                         task.hora.substring(0, 5)
