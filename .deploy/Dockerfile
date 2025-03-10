@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Instalar dependencias
-RUN npm install --legacy-peer-deps
+RUN npm install --force
 
 # Copiar el código fuente
 COPY . .
