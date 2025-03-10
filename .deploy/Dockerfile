@@ -25,7 +25,7 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY --from=builder /app/build /usr/share/nginx/html
 
 # Copiar configuración de Nginx
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./.deploy/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Exponer el puerto por defecto de Nginx
 EXPOSE 80
