@@ -52,6 +52,7 @@ const Contenido = (props: Props): ReactElement => {
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const [error, setError] = useState(false);
     const [tasks, setTasks] = useState<TaskModel[]>([]);
+    console.log("🚀 ~ Contenido ~ tasks:", tasks)
     const [newTask, setNewTask] = useState<TaskModel>({
         id         : uuidv4(),
         fecha      : currentDay,
@@ -165,12 +166,17 @@ const Contenido = (props: Props): ReactElement => {
     const deleteTask = async (id: string) => {
         if (id) {
             setTasks(tasks.filter((task) => task.id !== id));
-            await axios.delete(`${API_URL}/rows/${id}`);
-            fetchRows(currentDay);
+            const { data } = await axios.delete(`${API_URL}/rows/${id}/${currentDay}`);
+            if (data.success) {
+                fetchRows(currentDay);
+            } else {
+              console.error("Error en Delete:", data.message);
+            }
         }
     };
 
     const fetchRows = async (currentDay: string) => {
+         console.log("🚀 ~ fetchRows ~ currentDay:", currentDay)
          try {
             const { data } = await axios.get(`${API_URL}/rows?fecha=${currentDay}`);
             if (data.success) {
@@ -193,7 +199,7 @@ const Contenido = (props: Props): ReactElement => {
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentDay]);
-
+        
     if (isSmallScreen) {
         return (
         <MainStyle>
