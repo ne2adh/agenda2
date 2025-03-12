@@ -6,10 +6,10 @@ import { TaskModel } from "./Contenido";
 
 interface ContenidoItemProps {
     task            : TaskModel;
-    handleEditChange: (e: React.ChangeEvent<HTMLInputElement>, id: number, field: keyof TaskModel) => void;
-    toggleEdit      : (id: number) => void;
-    saveEdit        : (id: number) => void;
-    deleteTask      : (id: number) => void;
+    handleEditChange: (e: React.ChangeEvent<HTMLInputElement>, id: string, field: keyof TaskModel) => void;
+    toggleEdit      : (id: string) => void;
+    saveEdit        : (id: string) => void;
+    deleteTask      : (id: string) => void;
 }
 
 const TaskContainer = styled(Box)(({ theme }) => ({

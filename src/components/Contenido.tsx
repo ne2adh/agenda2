@@ -1,13 +1,14 @@
 import React, { ReactElement, useEffect, useState } from "react";
 import { IconButton, TextField, Table, TableBody, TableCell, TableContainer, TableRow, useMediaQuery, Box, TableHead, Typography } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from "@mui/icons-material/Delete";
 import ContenidoItem from "./ContenidoItem";
 import { Add } from "@mui/icons-material";
+import { v4 as uuidv4 } from 'uuid';
 
 import io from "socket.io-client";
 import axios from "axios";
@@ -17,7 +18,7 @@ const API_URL = process.env.REACT_APP_API_URL;
 const socket = io(`${API_URL}`);
 
 export interface TaskModel {
-    id          : number;
+    id          : string;
     fecha      ?: string;  
     responsable : string;
     institucion : string;
@@ -49,10 +50,10 @@ const Contenido = (props: Props): ReactElement => {
     
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
+    const [error, setError] = useState(false);
     const [tasks, setTasks] = useState<TaskModel[]>([]);
     const [newTask, setNewTask] = useState<TaskModel>({
-        id         : Date.now(),
+        id         : uuidv4(),
         fecha      : currentDay,
         responsable: "",
         institucion: "",
@@ -67,13 +68,13 @@ const Contenido = (props: Props): ReactElement => {
         setNewTask({ ...newTask, [field]: e.target.value });
     };
 
-    const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>, id: number, field: keyof TaskModel) => {
+    const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>, id: string, field: keyof TaskModel) => {
         setTasks(tasks.map((task) => task.id === id ? { ...task, [field]: e.target.value } : task ));
     };
 
     const addTask = () => {
         setNewTask({
-            id         : Date.now(),
+            id         : uuidv4(),
             fecha      : currentDay,
             responsable: "",
             institucion: "",
@@ -86,21 +87,27 @@ const Contenido = (props: Props): ReactElement => {
     };
 
     const saveNew = async () => {
-        try {
-            await axios.post(`${API_URL}/rows`, newTask);
-            setTasks([...tasks, newTask]);
-            currentDay && ContenidoCallBackData(currentDay, [...tasks, newTask]);
-            setNewTask({
-                id         : Date.now(),
-                fecha      : currentDay,
-                responsable: "",
-                institucion: "",
-                titulo     : "",
-                hora       : "",
-                lugar      : "",
-                isEditing  : false,
-                isNew      : false,
-            });
+        try {            
+            const { data } = await axios.post(`${API_URL}/rows`, newTask);
+            if (!data.success) {                
+                console.error("Error :", data.message);
+                setError(true)
+            } else {  
+                setError(false);              
+                setTasks([...tasks, newTask]);
+                currentDay && ContenidoCallBackData(currentDay, [...tasks, newTask]);
+                setNewTask({
+                    id         : uuidv4(),
+                    fecha      : currentDay,
+                    responsable: "",
+                    institucion: "",
+                    titulo     : "",
+                    hora       : "",
+                    lugar      : "",
+                    isEditing  : false,
+                    isNew      : false,
+                });
+            }
         }
         catch (error) {
             console.error("Error al guardar la tarea:", error);
@@ -109,7 +116,7 @@ const Contenido = (props: Props): ReactElement => {
 
     const cancelNew = () => {
         setNewTask({
-            id         : Date.now(),
+            id         : uuidv4(),
             fecha      : currentDay,
             responsable: "",
             institucion: "",
@@ -121,15 +128,16 @@ const Contenido = (props: Props): ReactElement => {
         })
     }
 
-    const cancelEdit = (id: number) => {
+    const cancelEdit = (id: string) => {
         setTasks(tasks.map((task) => task.id === id ? { ...task, isEditing: false } : task));
     };
 
-    const toggleEdit = (id: number) => {
+
+    const toggleEdit = (id: string) => {
         setTasks(tasks.map((task) => task.id === id ? { ...task, isEditing: !task.isEditing } : task));
     };
 
-    const saveEdit = async (id: number) => {
+    const saveEdit = async (id: string) => {
         const updatedTasks = tasks.map((task) =>
             task.id === id ? { ...task, isEditing: false, isNew: false } : task
         );
@@ -141,14 +149,20 @@ const Contenido = (props: Props): ReactElement => {
         if (!taskToSave) return;
     
         try {
-            await axios.post(`${API_URL}/rows`, taskToSave);
+            const { data } = await axios.post(`${API_URL}/rows`, taskToSave);
+            if (!data.success) {                
+                console.error("Error :", data.message);
+                setError(true)
+            } else {
+                setError(false)
+            }
         } catch (error) {
             console.error("Error al guardar la tarea:", error);
         }
     };
     
 
-    const deleteTask = async (id: number) => {
+    const deleteTask = async (id: string) => {
         if (id) {
             setTasks(tasks.filter((task) => task.id !== id));
             await axios.delete(`${API_URL}/rows/${id}`);
@@ -171,7 +185,7 @@ const Contenido = (props: Props): ReactElement => {
     };
 
     useEffect(() => {
-        if (!socket.connected) return; 
+        //if (!socket.connected) return; 
         fetchRows(currentDay);
         socket.on("update", fetchRows);
         return () => {
@@ -211,11 +225,11 @@ const Contenido = (props: Props): ReactElement => {
                             <TableCell sx={{borderBottom: "none"}}>
                                 <IconButton
                                     onClick={addTask}
-                                    color="secondary"
+                                    color="success"
                                     className="add-button"
                                     sx={{ opacity: 0 }}
                                 >
-                                    <AddCircleOutlineIcon />
+                                    <AddCircleIcon />
                                 </IconButton>
                             </TableCell>
                             <TableCell><Typography variant="subtitle2"><b>RESPONSABLE</b></Typography></TableCell>
@@ -238,10 +252,10 @@ const Contenido = (props: Props): ReactElement => {
                                 <TableCell sx={{ alignContent: 'end', width: "1%", borderBottom: "none" }}>
                                     {task.isEditing ? (
                                         <>
-                                            <IconButton onClick={() => saveEdit(task.id)} color="success">
+                                            <IconButton onClick={() => saveEdit(task.id)} color="secondary">
                                                 <SaveIcon />
                                             </IconButton>
-                                            <IconButton onClick={() => cancelEdit(task.id)} color="warning">
+                                            <IconButton onClick={() => cancelEdit(task.id)} color="error">
                                                 <CancelIcon />
                                             </IconButton>
                                         </>
@@ -348,7 +362,7 @@ const Contenido = (props: Props): ReactElement => {
                                 <TableCell sx={{ alignContent: 'end', width: "1%", borderBottom: "none" }}>
                                         <IconButton 
                                             onClick={() => saveNew()} 
-                                            color="success"
+                                            color="secondary"
                                         >
                                             <SaveIcon />
                                         </IconButton>
@@ -360,6 +374,8 @@ const Contenido = (props: Props): ReactElement => {
                                         onChange={(e: any) => handleChange(e, "responsable")}
                                         variant="standard"
                                         fullWidth
+                                        error={error}
+                                        helperText={error ? "Este campo es requerido" : ""}
                                     />
                                 </TableCell>
                                 <TableCell sx={{ alignContent: 'end', width: "15%", borderBottom: "none" }}>
@@ -369,6 +385,8 @@ const Contenido = (props: Props): ReactElement => {
                                         onChange={(e: any) => handleChange(e, "institucion")}
                                         variant="standard"
                                         fullWidth
+                                        error={error}
+                                        helperText={error ? "Este campo es requerido" : ""}
                                     />
                                 </TableCell>
                                 <TableCell sx={{ alignContent: 'end', width: "32%", borderBottom: "none" }}>
@@ -380,6 +398,8 @@ const Contenido = (props: Props): ReactElement => {
                                         rows={3}
                                         variant="standard"
                                         fullWidth
+                                        error={error}
+                                        helperText={error ? "Este campo es requerido" : ""}
                                     />
                                 </TableCell>
                                 <TableCell sx={{ alignContent: 'end', width: "8%", borderBottom: "none" }}>
@@ -389,8 +409,8 @@ const Contenido = (props: Props): ReactElement => {
                                         onChange={(e: any) => handleChange(e, "hora")}
                                         variant="standard"
                                         fullWidth
-                                        error={!!newTask.hora && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(newTask.hora)}
-                                        helperText={!!newTask.hora && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(newTask.hora) ? "Formato inválido (HH:mm)" : ""}
+                                        error={error && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(newTask.hora)}
+                                        helperText={error && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(newTask.hora) ? "Formato inválido (HH:mm)" : ""}
                                     />
                                 </TableCell>
                                 <TableCell sx={{ alignContent: 'end', width: "15%", borderBottom: "none" }}>
@@ -402,12 +422,14 @@ const Contenido = (props: Props): ReactElement => {
                                         multiline
                                         rows={2}
                                         fullWidth
+                                        error={error}
+                                        helperText={error ? "Este campo es requerido" : ""}
                                     />
                                 </TableCell>
                                 <TableCell sx={{ alignContent: 'end', width: "1%", borderBottom: "none"}}>
                                         <IconButton 
                                             onClick={() => cancelNew()} 
-                                            color="warning"
+                                            color="error"
                                         >
                                             <CancelIcon />
                                         </IconButton>
