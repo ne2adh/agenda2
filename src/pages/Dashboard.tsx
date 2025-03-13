@@ -61,14 +61,14 @@ export default function Dashboard() {
 
 	const fetchUsers = async () => {
 		try {
-		const { data } = await axios.get(`${API_URL}/usuarios`);
-		if (data.success) {
-			setUsuarios(data.data);
-		} else {
-			console.error("Error al obtener usuarios:", data.message);
-		}
+            const { data } = await axios.get(`${API_URL}/usuarios`);
+            if (data.success) {
+                setUsuarios(data.data);
+            } else {
+                console.error("Error al obtener usuarios:", data.message);
+            }
 		} catch (error) {
-		console.error("Error en la solicitud de usuarios:", error);
+		    console.error("Error en la solicitud de usuarios:", error);
 		}
 	};
 

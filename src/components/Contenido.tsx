@@ -40,6 +40,15 @@ const MainStyle = styled("div")(({ theme }) => ({
     },
 }));
 
+const MainStyle2 = styled("div")(({ theme }) => ({
+    flexGrow: 1,
+    overflow: "auto",
+    [theme.breakpoints.up("lg")]: {
+        paddingLeft: theme.spacing(2),
+        paddingRight: theme.spacing(2),
+    },
+}));
+
 type Props = {
     currentDay: string;
     ContenidoCallBackData: (day: string, tasks: TaskModel[]) => void;
@@ -52,7 +61,6 @@ const Contenido = (props: Props): ReactElement => {
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const [error, setError] = useState(false);
     const [tasks, setTasks] = useState<TaskModel[]>([]);
-    console.log("🚀 ~ Contenido ~ tasks:", tasks)
     const [newTask, setNewTask] = useState<TaskModel>({
         id         : uuidv4(),
         fecha      : currentDay,
@@ -176,7 +184,6 @@ const Contenido = (props: Props): ReactElement => {
     };
 
     const fetchRows = async (currentDay: string) => {
-         console.log("🚀 ~ fetchRows ~ currentDay:", currentDay)
          try {
             const { data } = await axios.get(`${API_URL}/rows?fecha=${currentDay}`);
             if (data.success) {
@@ -202,7 +209,7 @@ const Contenido = (props: Props): ReactElement => {
         
     if (isSmallScreen) {
         return (
-        <MainStyle>
+        <MainStyle2>
             {tasks.map((task) => (
                 <ContenidoItem
                     key={task.id}
@@ -218,7 +225,7 @@ const Contenido = (props: Props): ReactElement => {
                     <Add />
                 </IconButton>
             </Box>
-        </MainStyle>
+        </MainStyle2>
         );
     }
 

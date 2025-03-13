@@ -19,10 +19,13 @@ const Login = () => {
   const handleLogin = async () => {
     if (!username.trim()) return;
     try {
-      await axios.post(`${API_URL}/login`, { username });
-      localStorage.setItem("username", username);
-      console.log("🚀 ~ handleLogin ~ username:", username)
-      navigate(routes.DASHBOARD);
+        const { data } = await axios.post(`${API_URL}/login`, { username });
+        if (data.success) {                
+            localStorage.setItem("username", username);
+            navigate(routes.DASHBOARD);
+        } else {
+            console.error("Error en login", data.message);
+        } 
     } catch (error) {
       console.error("Error en login", error);
     }

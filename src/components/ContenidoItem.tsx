@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Grid, IconButton, TextField, Typography } from "@mui/material";
+import { Box, Card, CardActions, CardContent, Divider, Grid, IconButton, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/system";
 import { Edit, Save, Delete } from "@mui/icons-material";
 import { TaskModel } from "./Contenido";
@@ -15,14 +15,26 @@ interface ContenidoItemProps {
 const TaskContainer = styled(Box)(({ theme }) => ({
     display      : "flex",
     flexDirection: "column",
-    padding      : theme.spacing(2),
     borderBottom : "1px solid #ccc",
     borderRadius : theme.shape.borderRadius,
     marginBottom : theme.spacing(2),
 }));
 
+const StyledCard = styled(Card)(({ theme }) => ({
+    background: "#f9f9f9",
+    borderLeft: "6px solid #1976d2",
+    marginBottom: theme.spacing(2),
+    boxShadow: "0px 4px 6px rgba(0,0,0,0.1)",
+}));
+
+const Title = styled(Typography)(({ theme }) => ({
+    fontWeight: "bold",
+    lineHeight: '1.1',
+    marginBottom: theme.spacing(1.5),
+    color: "#333",
+}));
+
 const ContenidoItem: React.FC<ContenidoItemProps> = ({ task, handleEditChange, toggleEdit, saveEdit, deleteTask }) => {
-    console.log("🚀 ~ task:", task)
     const ContenidoForm = () => {
         return (
             <Grid container spacing={1}>
@@ -97,23 +109,37 @@ const ContenidoItem: React.FC<ContenidoItemProps> = ({ task, handleEditChange, t
                     <ContenidoForm />
                 ) : task.isNew ? (
                         <ContenidoForm />
-                    ) : (                    
-                    
-                        <>
-                            <Typography variant="body1"><strong>Responsable:</strong> {task.responsable}</Typography>
-                            <Typography variant="body1"><strong>Institución:</strong> {task.institucion}</Typography>
-                            <Typography variant="body1"><strong>Título:</strong> {task.titulo}</Typography>
-                            <Typography variant="body1"><strong>Hora:</strong> {task.hora}</Typography>
-                            <Typography variant="body1"><strong>Lugar:</strong> {task.lugar}</Typography>
-                            <Box display="flex" justifyContent="flex-end">
+                    ) : (
+                        <StyledCard>
+                            <CardContent sx={{ p: 1, py: 2 }}>
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        <Title variant="subtitle2">{task.titulo}</Title>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Responsable:</strong> {task.responsable}</Typography>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Institución:</strong> {task.institucion}</Typography>
+                                    </Grid>
+                                    <Grid item xs={9}>
+                                        <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Lugar:</strong> {task.lugar}</Typography>
+                                    </Grid>
+                                    <Grid item xs={3}>
+                                        <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Hora:</strong> {task.hora}</Typography>
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+                            <Divider />
+                            <CardActions sx={{ justifyContent: "flex-end", p: 0 }}>
                                 <IconButton onClick={() => deleteTask(task.id)} color="error">
                                     <Delete />
                                 </IconButton>
                                 <IconButton onClick={() => toggleEdit(task.id)} color="primary">
                                     <Edit />
                                 </IconButton>
-                            </Box>
-                        </>
+                            </CardActions>
+                        </StyledCard>
                     )
             }
         </TaskContainer>
