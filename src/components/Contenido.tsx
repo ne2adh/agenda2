@@ -62,7 +62,7 @@ const Contenido = (props: Props): ReactElement => {
     const [error, setError] = useState(false);
     const [tasks, setTasks] = useState<TaskModel[]>([]);
     const [newTask, setNewTask] = useState<TaskModel>({
-        id         : uuidv4(),
+        id         : "",
         fecha      : currentDay,
         responsable: "",
         institucion: "",
@@ -210,7 +210,7 @@ const Contenido = (props: Props): ReactElement => {
     if (isSmallScreen) {
         return (
         <MainStyle2>
-            {tasks.map((task) => (
+            {(newTask.isNew ? [...tasks, newTask] : tasks).map((task) => (
                 <ContenidoItem
                     key={task.id}
                     task={task}
@@ -218,6 +218,7 @@ const Contenido = (props: Props): ReactElement => {
                     toggleEdit={toggleEdit}
                     saveEdit={saveEdit}
                     cancelEdit={cancelEdit}
+                    cancelNew={cancelNew}
                     deleteTask={deleteTask}
                 />
             ))}

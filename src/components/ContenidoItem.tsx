@@ -51,6 +51,7 @@ interface ContenidoItemProps {
     toggleEdit      : (id: string) => void;
     saveEdit        : (id: string) => void;
     cancelEdit      : (id: string) => void;
+    cancelNew       : (id: string) => void;
     deleteTask      : (id: string) => void;
 }
 
@@ -73,8 +74,9 @@ const Title = styled(Typography)(({ theme }) => ({
     color: "#333",
 }));
 
-const ContenidoItem: React.FC<ContenidoItemProps> = ({ task, handleEditChange, toggleEdit, saveEdit, cancelEdit, deleteTask }) => {
-    const ContenidoForm = () => {
+const ContenidoItem: React.FC<ContenidoItemProps> = ({ task, handleEditChange, toggleEdit, saveEdit, cancelEdit, cancelNew, deleteTask }) => {        
+    const ContenidoForm = ( task: any) => {
+        console.log("🚀 ~ ContenidoForm ~ task:", task)
         return (
             <Grid container spacing={1}>
                 <Grid item xs={12}>
@@ -132,69 +134,69 @@ const ContenidoItem: React.FC<ContenidoItemProps> = ({ task, handleEditChange, t
                     <IconButton onClick={() => saveEdit(task.id)} color="primary">
                         <Save />
                     </IconButton>
-                    {!task.isEditing && (
-                        <IconButton onClick={() => toggleEdit(task.id)} color="default">
-                            <Edit />
-                        </IconButton>
-                    )}
-                    <IconButton onClick={() => cancelEdit(task.id)} color="error">
+                    <IconButton 
+                        onClick={() => (task.isEditing ? cancelEdit(task.id) : cancelNew(task.id))} 
+                        color="error"
+                    >
                         <CancelIcon />
-                    </IconButton>
+                    </IconButton> 
                 </Grid>
             </Grid>
         );
     }
+
+    if(task.isNew && !task.isEditing) {
+        return <ContenidoForm task={task} />
+    }
+
     return (
         <TaskContainer>
             {
                 task.isEditing ? (
-                    <ContenidoForm />
-                ) : task.isNew ? (
-                        <ContenidoForm />
-                    ) : (
-                        <Accordion>
-                            <AccordionSummary>
-                                <Title variant="subtitle2">{task.titulo}</Title>
-                                <Typography sx={{ ml: 2 }}>{task.hora.substring(0, 5)}</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails sx={{ p: 0 }}>
-                                <StyledCard>
-                                    <CardContent sx={{ p: 1, pt: 2 }}>
-                                        <Grid container>                                            
-                                            <Grid item xs={3}>
-                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Responsable:</strong></Typography>
-                                            </Grid>
-                                            <Grid item xs={9}>
-                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}>{task.responsable}</Typography>
-                                            </Grid>
-                                            <Grid item xs={3}>
-                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Institución:</strong></Typography>
-                                            </Grid>
-                                            <Grid item xs={9}>
-                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}>{task.institucion}</Typography>
-                                            </Grid>
-                                            <Grid item xs={3}>
-                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Lugar:</strong></Typography>
-                                            </Grid>
-                                            <Grid item xs={9}>
-                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}>{task.lugar}</Typography>
-                                            </Grid>
+                    <ContenidoForm task={task} />
+                ) : (
+                    <Accordion>
+                        <AccordionSummary>
+                            <Title variant="subtitle2">{task.titulo}</Title>
+                            <Typography sx={{ ml: 2 }}>{task.hora.substring(0, 5)}</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails sx={{ p: 0 }}>
+                            <StyledCard>
+                                <CardContent sx={{ p: 1, pt: 2 }}>
+                                    <Grid container>                                            
+                                        <Grid item xs={3}>
+                                            <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Responsable:</strong></Typography>
                                         </Grid>
-                                    </CardContent>
-                                    <CardActions sx={{ justifyContent: "space-between", p: 0 }}>
-                                        <IconButton onClick={() => deleteTask(task.id)} color="error" size="small">
-                                            <Delete />
-                                        </IconButton>
-                                        <IconButton onClick={() => toggleEdit(task.id)} color="primary" size="small">
-                                            <Edit />
-                                        </IconButton>
-                                    </CardActions>
-                                </StyledCard>
-                            </AccordionDetails>
-                        </Accordion>
-                    )
+                                        <Grid item xs={9}>
+                                            <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}>{task.responsable}</Typography>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Institución:</strong></Typography>
+                                        </Grid>
+                                        <Grid item xs={9}>
+                                            <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}>{task.institucion}</Typography>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Lugar:</strong></Typography>
+                                        </Grid>
+                                        <Grid item xs={9}>
+                                            <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}>{task.lugar}</Typography>
+                                        </Grid>
+                                    </Grid>
+                                </CardContent>
+                                <CardActions sx={{ justifyContent: "space-between", p: 0 }}>
+                                    <IconButton onClick={() => deleteTask(task.id)} color="error" size="small">
+                                        <Delete />
+                                    </IconButton>
+                                    <IconButton onClick={() => toggleEdit(task.id)} color="primary" size="small">
+                                        <Edit />
+                                    </IconButton>
+                                </CardActions>
+                            </StyledCard>
+                        </AccordionDetails>
+                    </Accordion>
+                )
             }
-            
         </TaskContainer>
     );
 };
