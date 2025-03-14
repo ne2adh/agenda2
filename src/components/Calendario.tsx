@@ -1,24 +1,12 @@
 import { ReactElement, useState } from "react";
 import { styled } from "@mui/material/styles";
-import { Box, Typography, IconButton, Popover, Button } from "@mui/material";
+import { Box, Typography, IconButton } from "@mui/material";
 import {ArrowBackIos, ArrowForwardIos} from '@mui/icons-material';
-import { YearCalendar } from "@mui/x-date-pickers/YearCalendar";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { MonthCalendar } from "@mui/x-date-pickers/MonthCalendar";
-import { Avatar, Tooltip } from "@mui/material";
-import LogoutIcon from "@mui/icons-material/Logout";
-import PrintIcon from "@mui/icons-material/Print";
 
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/es";
-import { Usuario } from "pages/Dashboard";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 dayjs.locale("es");
-
-const API_URL = process.env.REACT_APP_API_URL;
 
 const CalendarContainer = styled(Box)(({ theme }) => ({
     display: "flex",
@@ -75,20 +63,15 @@ const Day = styled(Typography, {
 
 type Props = {
     onCurrentDayClick: (currentDate: Dayjs) => void;
-    onImprimirContenidoClick: (selectedDay: Dayjs) => void;
-    usuarios: Usuario[];
 };
 
 const Calendario = (props: Props): ReactElement => {
-    const { onCurrentDayClick, onImprimirContenidoClick, usuarios } = props;
-    const navigate = useNavigate();
+    const { onCurrentDayClick } = props;
 
     const [selectedDay, setSelectedDay] = useState<Dayjs | null>(null);
     const [currentDate, setCurrentDate] = useState(dayjs());
     const today = dayjs().date();
-    const [anchorElMonth, setAnchorElMonth] = useState<null | HTMLElement>(null);
-    const [anchorElYear, setAnchorElYear] = useState<null | HTMLElement>(null);
-
+    
     const getWeekDays = () => ["LUN.","MAR.","MIE.","JUE.","VIE.","SAB.","DOM.",];
 
     const getWeekDaysNumbers = () => {
@@ -102,130 +85,15 @@ const Calendario = (props: Props): ReactElement => {
 
     const goToNextWeek = () => {
         setCurrentDate((prev) => prev.add(1, "week"));
-    };
-
-    const handleMonthClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElMonth(event.currentTarget);
-    };
-
-    const handleYearClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElYear(event.currentTarget);
-    };
-
-    const handleCloseMonth = () => {
-        setAnchorElMonth(null);
-    };
-
-    const handleCloseYear = () => {
-        setAnchorElYear(null);
-    };
-
-    const handleMonthChange = (newMonth: Dayjs) => {
-        setCurrentDate(currentDate.month(newMonth.month())); 
-        handleCloseMonth();
-    };
-
-    const handleYearChange = (newYear: Dayjs) => {
-        setCurrentDate(currentDate.year(newYear.year()));
-        handleCloseYear();
-    };
+    };   
 
     const handleDayClick = (day: Dayjs) => {
         setSelectedDay(day);
         onCurrentDayClick(day);
-    };
-
-    const handleLogout = async () => {
-        try {
-            const username = localStorage.getItem("username");
-            const { data } = await axios.post(`${API_URL}/logout`, { username });
-            if (data.success) {
-                localStorage.removeItem("username");
-                navigate("/");
-            } else {
-                console.error("Error al obtener logout:", data.message);
-            }            
-        } catch (error) {
-          console.error("Error al cerrar sesión:", error);
-        }
-    };
+    };  
 
 return (
-    <CalendarContainer>
-        <Box display="flex" alignItems="center" gap={1} position="absolute" top={10} right={20}>
-            {usuarios.map((u) => (
-                <Tooltip key={u.id} title={u.username}>
-                    <Avatar sx={{ bgcolor: u.isEditing ? "green" : "gray", height: 24, width: 24, fontSize: 12 }}>
-                        {u.username[0].toUpperCase()}
-                    </Avatar>
-                </Tooltip>
-            ))}
-        </Box>
-        <Box display="flex" flexDirection="column" alignItems="flex-start" position="absolute" top={10} left={20}>
-            <Typography variant="subtitle1">
-                Bienvenido, {localStorage.getItem("username")}!  <IconButton size="small" color="secondary" onClick={handleLogout}>
-                                                                    <LogoutIcon />
-                                                                </IconButton>              
-            </Typography>            
-            <Button 
-                size="small" 
-                color="info" 
-                variant="contained" 
-                onClick={()=> selectedDay && onImprimirContenidoClick(selectedDay)} 
-                sx={{ mt: 1 }} 
-                disabled={!selectedDay}
-            >
-                <PrintIcon /> Imprimir
-            </Button>
-        </Box>
-        <Box width="100%" display="flex" justifyContent="space-evenly">
-            <Typography
-                variant="h6"
-                fontWeight="bold"
-                onClick={handleMonthClick}
-                style={{ cursor: "pointer" }}
-            >
-                {currentDate.format("MMMM").toUpperCase()}
-            </Typography>
-            <Typography
-                variant="h6"
-                fontWeight="bold"
-                onClick={handleYearClick}
-                style={{ cursor: "pointer" }}
-            >
-                {currentDate.format("YYYY").toUpperCase()}
-            </Typography>
-        </Box>
-        <Popover
-            open={Boolean(anchorElMonth)}
-            anchorEl={anchorElMonth}
-            onClose={handleCloseMonth}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-            transformOrigin={{ vertical: "top", horizontal: "center" }}
-            disableAutoFocus
-            disableEnforceFocus
-        >
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <Box sx={{ width: 300, p: 1 }}>
-                    <MonthCalendar value={currentDate} onChange={handleMonthChange} />
-                </Box>
-            </LocalizationProvider>
-        </Popover>
-        <Popover
-            open={Boolean(anchorElYear)}
-            anchorEl={anchorElYear}
-            onClose={handleCloseYear}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-            transformOrigin={{ vertical: "top", horizontal: "center" }}
-            disableAutoFocus
-            disableEnforceFocus
-        >
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <Box sx={{ width: 300, p: 1 }}>
-                    <YearCalendar value={currentDate} onChange={handleYearChange} />
-                </Box>
-            </LocalizationProvider>
-        </Popover>
+    <CalendarContainer>        
         <WeekNavigation>
             <IconButton onClick={goToPreviousWeek} color="warning">
                 <ArrowBackIos />
@@ -233,7 +101,7 @@ return (
             <Box width="100%">
                 <WeekDays>
                     {getWeekDays().map((day, index) => (
-                    <Typography key={index} variant="body2">
+                    <Typography key={index} variant="body2" sx={{ fontWeight: "bold" }}>
                         {day}
                     </Typography>
                     ))}

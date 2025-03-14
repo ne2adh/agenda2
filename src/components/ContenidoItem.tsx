@@ -2,13 +2,54 @@ import React from "react";
 import { Box, Card, CardActions, CardContent, Divider, Grid, IconButton, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/system";
 import { Edit, Save, Delete } from "@mui/icons-material";
+import CancelIcon from '@mui/icons-material/Cancel';
 import { TaskModel } from "./Contenido";
+import MuiAccordionSummary, {
+    AccordionSummaryProps,
+    accordionSummaryClasses,
+  } from '@mui/material/AccordionSummary';
+  import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
+
+const Accordion = styled((props: AccordionProps) => (
+    <MuiAccordion disableGutters elevation={0} square {...props} />
+  ))(({ theme }) => ({
+   
+    '&:not(:last-child)': {
+      borderBottom: 0,
+    },
+    '&::before': {
+      display: 'none',
+    },
+}));
+
+const AccordionSummary = styled((props: AccordionSummaryProps) => (
+    <MuiAccordionSummary
+      expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />}
+      {...props}
+    />
+  ))(({ theme }) => ({
+    backgroundColor: 'rgba(0, 0, 0, .03)',
+    flexDirection: 'row-reverse',
+    [`& .${accordionSummaryClasses.expandIconWrapper}.${accordionSummaryClasses.expanded}`]:
+      {
+        transform: 'rotate(90deg)',
+      },
+    [`& .${accordionSummaryClasses.content}`]: {
+      marginLeft: theme.spacing(1),
+    },
+    ...theme.applyStyles('dark', {
+      backgroundColor: 'rgba(255, 255, 255, .05)',
+    }),
+}));
 interface ContenidoItemProps {
     task            : TaskModel;
     handleEditChange: (e: React.ChangeEvent<HTMLInputElement>, id: string, field: keyof TaskModel) => void;
     toggleEdit      : (id: string) => void;
     saveEdit        : (id: string) => void;
+    cancelEdit      : (id: string) => void;
     deleteTask      : (id: string) => void;
 }
 
@@ -21,20 +62,17 @@ const TaskContainer = styled(Box)(({ theme }) => ({
 }));
 
 const StyledCard = styled(Card)(({ theme }) => ({
-    background: "#f9f9f9",
-    borderLeft: "6px solid #1976d2",
-    marginBottom: theme.spacing(2),
-    boxShadow: "0px 4px 6px rgba(0,0,0,0.1)",
+    background: "#fff",
+    boxShadow: "none",
 }));
 
 const Title = styled(Typography)(({ theme }) => ({
     fontWeight: "bold",
     lineHeight: '1.1',
-    marginBottom: theme.spacing(1.5),
     color: "#333",
 }));
 
-const ContenidoItem: React.FC<ContenidoItemProps> = ({ task, handleEditChange, toggleEdit, saveEdit, deleteTask }) => {
+const ContenidoItem: React.FC<ContenidoItemProps> = ({ task, handleEditChange, toggleEdit, saveEdit, cancelEdit, deleteTask }) => {
     const ContenidoForm = () => {
         return (
             <Grid container spacing={1}>
@@ -89,15 +127,18 @@ const ContenidoItem: React.FC<ContenidoItemProps> = ({ task, handleEditChange, t
                         fullWidth
                     />
                 </Grid>
-                <Grid item xs={12} display="flex" justifyContent="flex-end">
+                <Grid item xs={12} display="flex" justifyContent="space-between">
                     <IconButton onClick={() => saveEdit(task.id)} color="primary">
                         <Save />
                     </IconButton>
-                    {!task.isNew && (
+                    {!task.isEditing && (
                         <IconButton onClick={() => toggleEdit(task.id)} color="default">
                             <Edit />
                         </IconButton>
                     )}
+                    <IconButton onClick={() => cancelEdit(task.id)} color="error">
+                        <CancelIcon />
+                    </IconButton>
                 </Grid>
             </Grid>
         );
@@ -110,38 +151,49 @@ const ContenidoItem: React.FC<ContenidoItemProps> = ({ task, handleEditChange, t
                 ) : task.isNew ? (
                         <ContenidoForm />
                     ) : (
-                        <StyledCard>
-                            <CardContent sx={{ p: 1, py: 2 }}>
-                                <Grid container>
-                                    <Grid item xs={12}>
-                                        <Title variant="subtitle2">{task.titulo}</Title>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Responsable:</strong> {task.responsable}</Typography>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Institución:</strong> {task.institucion}</Typography>
-                                    </Grid>
-                                    <Grid item xs={9}>
-                                        <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Lugar:</strong> {task.lugar}</Typography>
-                                    </Grid>
-                                    <Grid item xs={3}>
-                                        <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Hora:</strong> {task.hora}</Typography>
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                            <Divider />
-                            <CardActions sx={{ justifyContent: "flex-end", p: 0 }}>
-                                <IconButton onClick={() => deleteTask(task.id)} color="error">
-                                    <Delete />
-                                </IconButton>
-                                <IconButton onClick={() => toggleEdit(task.id)} color="primary">
-                                    <Edit />
-                                </IconButton>
-                            </CardActions>
-                        </StyledCard>
+                        <Accordion>
+                            <AccordionSummary sx={{ justifyContent: 'space-between' }}>
+                                <Title variant="subtitle2">{task.titulo}</Title>
+                                <Typography sx={{ ml: 2 }}>{task.hora.substring(0, 5)}</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ p: 0 }}>
+                                <StyledCard>
+                                    <CardContent sx={{ p: 1, pt: 2 }}>
+                                        <Grid container>                                            
+                                            <Grid item xs={3}>
+                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Responsable:</strong></Typography>
+                                            </Grid>
+                                            <Grid item xs={9}>
+                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}>{task.responsable}</Typography>
+                                            </Grid>
+                                            <Grid item xs={3}>
+                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Institución:</strong></Typography>
+                                            </Grid>
+                                            <Grid item xs={9}>
+                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}>{task.institucion}</Typography>
+                                            </Grid>
+                                            <Grid item xs={3}>
+                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}><strong>Lugar:</strong></Typography>
+                                            </Grid>
+                                            <Grid item xs={9}>
+                                                <Typography sx={{ fontSize: '12px', lineHeight: '1.1'}}>{task.lugar}</Typography>
+                                            </Grid>
+                                        </Grid>
+                                    </CardContent>
+                                    <CardActions sx={{ justifyContent: "space-between", p: 0 }}>
+                                        <IconButton onClick={() => deleteTask(task.id)} color="error" size="small">
+                                            <Delete />
+                                        </IconButton>
+                                        <IconButton onClick={() => toggleEdit(task.id)} color="primary" size="small">
+                                            <Edit />
+                                        </IconButton>
+                                    </CardActions>
+                                </StyledCard>
+                            </AccordionDetails>
+                        </Accordion>
                     )
             }
+            
         </TaskContainer>
     );
 };

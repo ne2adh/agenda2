@@ -217,6 +217,7 @@ const Contenido = (props: Props): ReactElement => {
                     handleEditChange={handleEditChange}
                     toggleEdit={toggleEdit}
                     saveEdit={saveEdit}
+                    cancelEdit={cancelEdit}
                     deleteTask={deleteTask}
                 />
             ))}
