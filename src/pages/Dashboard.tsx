@@ -50,7 +50,7 @@ export interface Usuario {
 
 type AppBarProps = {
     onImprimirContenidoClick: () => void;
-    usuarios: Usuario[];
+    usuarios?: Usuario[];
 };
 function CustomAppBar(props : AppBarProps) {    
     const { onImprimirContenidoClick, usuarios } = props;
