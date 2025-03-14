@@ -39,6 +39,7 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
       },
     [`& .${accordionSummaryClasses.content}`]: {
       marginLeft: theme.spacing(1),
+      justifyContent: 'space-between',      
     },
     ...theme.applyStyles('dark', {
       backgroundColor: 'rgba(255, 255, 255, .05)',
@@ -152,7 +153,7 @@ const ContenidoItem: React.FC<ContenidoItemProps> = ({ task, handleEditChange, t
                         <ContenidoForm />
                     ) : (
                         <Accordion>
-                            <AccordionSummary sx={{ justifyContent: 'space-between' }}>
+                            <AccordionSummary>
                                 <Title variant="subtitle2">{task.titulo}</Title>
                                 <Typography sx={{ ml: 2 }}>{task.hora.substring(0, 5)}</Typography>
                             </AccordionSummary>
