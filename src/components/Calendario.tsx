@@ -13,7 +13,7 @@ const CalendarContainer = styled(Box)(({ theme }) => ({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    padding: theme.spacing(2),
+    //padding: theme.spacing(2),
 }));
 
 const WeekNavigation = styled(Box)({

@@ -33,10 +33,10 @@ export interface TaskModel {
 const MainStyle = styled("div")(({ theme }) => ({
     flexGrow: 1,
     overflow: "auto",
-    padding: theme.spacing(2),
+    //padding: theme.spacing(2),
     [theme.breakpoints.up("lg")]: {
-        paddingLeft: theme.spacing(2),
-        paddingRight: theme.spacing(2),
+        //paddingLeft: theme.spacing(2),
+        //paddingRight: theme.spacing(2),
     },
 }));
 

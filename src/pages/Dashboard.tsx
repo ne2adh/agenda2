@@ -136,7 +136,7 @@ function CustomAppBar(props : AppBarProps) {
                 </Box>
             </LocalizationProvider>
         </Popover>
-        <AppBar position="static" color="error">
+        <AppBar position="fixed" color="error" sx={{ zIndex: theme.zIndex.drawer + 1 }}>
             <Toolbar>
                 <IconButton
                     size="large"
@@ -240,28 +240,27 @@ export default function Dashboard() {
 
     return (
         <>
-            <CustomAppBar 
-                usuarios={usuarios}
-                onImprimirContenidoClick={handleImprimirContenidoClick}
-            />
-            <Container maxWidth="xl">
-                {
-                    <div style={{ overflow: "hidden", height: 0 }}>
+            {
+                <div style={{ overflow: "hidden", height: 0 }}>
                     <ComponentToPrintContenido
                         ref={componentRecetaRef}
                         tasks={htmlContenidoOpen}
                         currentDay={currentDay}
                     />
-                    </div>
-                }        
-                <Calendario
-                    onCurrentDayClick={handleClickCurrentDay}			
-                />
-                <Contenido
-                    currentDay={currentDay}
-                    ContenidoCallBackData={handleContenidoCallBackData}
-                />
-            </Container>
+                </div>
+            }    
+            <CustomAppBar 
+                usuarios={usuarios}
+                onImprimirContenidoClick={handleImprimirContenidoClick}
+            />
+            <Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 16px)", overflow: "hidden" }}>
+                <Box sx={{ pt: 9 }}>
+                    <Calendario onCurrentDayClick={handleClickCurrentDay} />
+                </Box>
+                <Box sx={{ flexGrow: 1, overflowY: "auto", mt: 2 }}>
+                    <Contenido currentDay={currentDay} ContenidoCallBackData={handleContenidoCallBackData} />
+                </Box>
+            </Container>       
         </>
     );
 }
